@@ -1,17 +1,27 @@
-# FILE-ENCRYPTION-SYSTEM
-# NIS Project – Flask Application
-
-## Aim
-To develop a secure web application using Flask.
+#FILE-ENCRYPTION-SYSTEM
+# Secure File Storage System
 
 ## Description
-This project is a Flask-based web application developed as part of the NIS course.
-It demonstrates backend development, routing, and template rendering.
+This project is a secure file storage web application developed using Flask.
+It uses hybrid encryption (AES-GCM + RSA) to securely store and retrieve user files.
+User authentication is implemented using Flask-Login and password hashing with Bcrypt.
+
+## Features
+- User registration and login
+- Secure file upload and download
+- AES-GCM encryption for files
+- RSA encryption for AES keys
+- Integrity verification using SHA-256
+- Access control (only file owner can download/delete)
 
 ## Technologies Used
 - Python
 - Flask
-- HTML, CSS
+- Flask-SQLAlchemy
+- Flask-Login
+- Flask-Bcrypt
+- Cryptography
+- SQLite
 
 ## How to Run
 1. Install Python 3.x
@@ -19,8 +29,5 @@ It demonstrates backend development, routing, and template rendering.
    pip install -r requirements.txt
 3. Run the application:
    python app.py
-   or use run_flask.bat
-
-## Project Structure
-- app.py : Main application file
-- templates/ : HTML files
+4. Open browser and visit:
+   http://127.0.0.1:5000/
