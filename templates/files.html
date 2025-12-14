@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h4>Your Uploaded Files</h4>
+  <a href="{{ url_for('index') }}" class="btn btn-outline-secondary-soft">Upload New</a>
+</div>
+
+{% if files|length == 0 %}
+  <div class="card card-float p-4 text-center small text-muted">No files uploaded yet.</div>
+{% else %}
+  <div class="row g-3">
+    {% for id, name, uploaded_at, size in files %}
+      <div class="col-12">
+        <div class="card card-float p-3 file-card d-flex justify-content-between align-items-center fade-up">
+          <div>
+            <h6 class="mb-1" style="font-weight:700;">{{ name }}</h6>
+            <div class="small text-muted">
+              {% if uploaded_at %}Uploaded on {{ uploaded_at.strftime('%Y-%m-%d %H:%M:%S') }}{% endif %}
+              {% if size %} — {{ (size/1024)|round(2) }} KB{% endif %}
+            </div>
+          </div>
+
+          <div class="d-flex gap-2 align-items-center">
+            <a class="btn btn-teal btn-sm" href="{{ url_for('download', file_id=id) }}">
+              <i class="fa fa-download me-1"></i> Download
+            </a>
+
+            <button class="btn btn-outline-danger-custom btn-sm" onclick="confirmDelete({{ id }}, this)">
+              <i class="fa fa-trash me-1"></i> Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+  async function confirmDelete(fileId, btn){
+    const result = await Swal.fire({
+      title: 'Delete file?',
+      text: 'This will permanently remove the file from disk and database.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, delete it',
+      cancelButtonText: 'Cancel'
+    });
+
+    if(!result.isConfirmed) return;
+
+    try {
+      const resp = await fetch(`{{ url_for('delete_file', file_id=0) }}`.replace('/0','/' + fileId), {
+        method: 'POST',
+        headers: { 'Accept': 'application/json' }
+      });
+
+      if(resp.ok){
+        Swal.fire({ icon:'success', title:'Deleted', toast:true, position:'top-end', timer:1100, showConfirmButton:false });
+        const card = btn.closest('.card');
+        if(card) card.style.opacity = '0'; setTimeout(()=> card.remove(), 350);
+      } else {
+        Swal.fire('Failed', 'Server returned an error.', 'error');
+      }
+    } catch(err){
+      Swal.fire('Error', 'Network error while deleting.', 'error');
+    }
+  }
+</script>
+{% endblock %}

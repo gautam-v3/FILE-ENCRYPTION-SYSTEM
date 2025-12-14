@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="d-flex justify-content-center">
+  <div class="card card-float p-4 fade-up" style="max-width:520px; width:100%;">
+    <h4 class="mb-3">Create account</h4>
+    <form method="post">
+      <div class="mb-3">
+        <label class="form-label">Username</label>
+        <input name="username" class="form-control" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Password</label>
+        <input type="password" name="password" class="form-control" required>
+      </div>
+      <div class="d-grid">
+        <button class="btn btn-accent">Register</button>
+      </div>
+    </form>
+    <div class="text-center small text-muted mt-3">Already registered? <a href="{{ url_for('login') }}">Login</a></div>
+  </div>
+</div>
+{% endblock %}

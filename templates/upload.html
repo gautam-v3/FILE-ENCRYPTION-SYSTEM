@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="row g-3">
+  <div class="col-lg-8">
+    <div class="card card-float p-4 fade-up">
+      <h5 class="mb-2">Upload a file</h5>
+      <p class="small text-muted mb-3">Allowed: txt, pdf, png, jpg, jpeg, gif. Max ~200 MB.</p>
+
+      <form id="uploadForm" enctype="multipart/form-data">
+        <div class="mb-3">
+          <input class="form-control" type="file" name="file" id="fileInput" required>
+        </div>
+
+        <div class="mb-3" id="progressSection" style="display:none;">
+          <div class="progress-wrap">
+            <div id="progressBar" class="progress-bar-custom"></div>
+          </div>
+          <div class="small text-muted mt-2" id="progressText">Uploading… 0%</div>
+        </div>
+
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-accent">Upload & Encrypt</button>
+          <a class="btn btn-outline-secondary-soft" href="{{ url_for('list_files') }}">My Files</a>
+        </div>
+      </form>
+    </div>
+
+    <div class="mt-3">
+      <div class="card card-float p-3">
+        <strong>Note</strong>
+        <div class="small text-muted">Each file encrypted with per-file AES key; AES keys encrypted with RSA and stored in DB.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card card-float p-3 fade-up">
+      <h6>Quick Links</h6>
+      <a class="btn btn-teal mb-2 w-100" href="{{ url_for('index') }}">Home</a>
+      <a class="btn btn-outline-secondary-soft w-100" href="{{ url_for('list_files') }}">View My Files</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // AJAX upload with progress (vanilla XHR)
+  const uploadForm = document.getElementById('uploadForm');
+  const fileInput = document.getElementById('fileInput');
+  const progressSection = document.getElementById('progressSection');
+  const progressBar = document.getElementById('progressBar');
+  const progressText = document.getElementById('progressText');
+
+  uploadForm.addEventListener('submit', function(e){
+    e.preventDefault();
+    const file = fileInput.files[0];
+    if(!file){ Swal.fire('No file','Please select a file to upload.','warning'); return; }
+
+    const form = new FormData();
+    form.append('file', file);
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '{{ url_for("upload_file") }}', true);
+
+    xhr.upload.onprogress = function(ev) {
+      if(ev.lengthComputable){
+        const percent = Math.round((ev.loaded/ev.total) * 100);
+        progressSection.style.display = 'block';
+        progressBar.style.width = percent + '%';
+        progressText.textContent = 'Uploading… ' + percent + '%';
+      }
+    };
+
+    xhr.onload = function(){
+      if(xhr.status >= 200 && xhr.status < 300){
+        Swal.fire({ icon: 'success', title: 'Uploaded', toast: true, position: 'top-end', timer: 1200, showConfirmButton: false });
+        setTimeout(()=> { window.location.href = '{{ url_for("list_files") }}'; }, 600);
+      } else {
+        Swal.fire('Upload failed','Server error during upload.','error');
+        progressSection.style.display = 'none';
+        progressBar.style.width = '0%';
+        progressText.textContent = 'Uploading… 0%';
+      }
+    };
+
+    xhr.onerror = function(){
+      Swal.fire('Upload failed','Network error','error');
+      progressSection.style.display = 'none';
+      progressBar.style.width = '0%';
+      progressText.textContent = 'Uploading… 0%';
+    };
+
+    xhr.send(form);
+  });
+</script>
+{% endblock %}

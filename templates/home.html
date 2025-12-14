@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="hero fade-up">
+  <div class="glow-dot one"></div>
+  <div class="glow-dot two"></div>
+
+  <div class="row align-items-center">
+    <div class="col-md-7">
+      <h1 class="hero-title">SecureFiles — store with confidence</h1>
+      <p class="hero-sub">AES-GCM encryption for content; AES keys protected with RSA; passwords hashed with bcrypt.</p>
+
+      <div class="d-flex gap-2 mb-3">
+        <a href="{{ url_for('login') }}" class="btn btn-accent">Login</a>
+        <a href="{{ url_for('register') }}" class="btn btn-teal">Register</a>
+      </div>
+
+      <div class="row g-2">
+        <div class="col-sm-6">
+          <div class="card card-float p-3">
+            <strong>Confidential</strong>
+            <div class="small text-muted">Files encrypted for privacy.</div>
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="card card-float p-3">
+            <strong>Integrity</strong>
+            <div class="small text-muted">SHA-256 verifies ciphertext integrity.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-5 text-center">
+      <div class="card card-float p-4 pulse" style="border-radius:18px;">
+        <div style="font-size:48px">🔒</div>
+        <div class="mt-2"><strong>Encrypted uploads</strong></div>
+        <div class="small text-muted">Only owners can decrypt downloads.</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
