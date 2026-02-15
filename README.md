@@ -23,6 +23,15 @@ User authentication is implemented using Flask-Login and password hashing with B
 - Cryptography
 - SQLite
 
+## Hybrid Encryption Architecture
+
+This system uses:
+- AES-256-GCM for file encryption
+- RSA-4096 for encrypting AES session keys
+- SHA-256 for integrity verification
+
+This approach ensures confidentiality, integrity and secure key management.
+
 ## How to Run
 1. Install Python 3.x
 2. Install dependencies:
