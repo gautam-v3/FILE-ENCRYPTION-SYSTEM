@@ -97,6 +97,8 @@ class FileMeta(db.Model):
     owner = db.relationship("User", backref="files")
 
 # ---------------- flask-login loader ----------------
+
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
@@ -132,6 +134,7 @@ def rsa_decrypt_key(enc_key: bytes):
 
 # ---------------- routes (register/login/upload/list/download) ----------------
 @app.route("/")
+
 def index():
     if current_user.is_authenticated:
         return render_template("upload.html", title="Upload Files")
@@ -220,21 +223,48 @@ def download(file_id):
     fmeta = FileMeta.query.get(file_id)
     if not fmeta:
         abort(404)
+
     if fmeta.owner_id != current_user.id:
         abort(403)
+
     stored_path = os.path.join(app.config["UPLOAD_FOLDER"], fmeta.stored_name)
     if not os.path.exists(stored_path):
         abort(404)
+
     with open(stored_path, "rb") as fh:
         ciphertext = fh.read()
+
+    # Integrity verification
     if sha256_hex(ciphertext) != fmeta.sha256:
+        app.logger.warning(
+            f"Integrity check failed for file {fmeta.original_name} "
+            f"requested by user {current_user.username}"
+        )
         abort(500, description="Integrity check failed")
+
     try:
         aes_key = rsa_decrypt_key(fmeta.enc_key)
         plaintext = decrypt_file_bytes(ciphertext, fmeta.nonce, aes_key)
-    except Exception as e:
+    except Exception:
+        app.logger.error(
+            f"Decryption failed for file {fmeta.original_name} "
+            f"requested by user {current_user.username}"
+        )
         abort(500, description="Decryption failed")
-    return send_file(io.BytesIO(plaintext), as_attachment=True, download_name=fmeta.original_name, mimetype="application/octet-stream")
+
+    #  AUDIT LOG ENTRY (SUCCESSFUL DOWNLOAD)
+    app.logger.info(
+        f"User '{current_user.username}' downloaded file "
+        f"'{fmeta.original_name}' at {datetime.utcnow()}"
+    )
+
+    return send_file(
+        io.BytesIO(plaintext),
+        as_attachment=True,
+        download_name=fmeta.original_name,
+        mimetype="application/octet-stream"
+    )
+
 #delete----------------
 @app.route("/delete/<int:file_id>", methods=["POST"])
 @login_required
