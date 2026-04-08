@@ -1,0 +1,9 @@
+SCM workflow:
+-Issue created (requirement/bug)
+-Feature branch created
+-Code implemented
+-Commit with message
+-Pull Request created
+-Code review done
+-Merge into development → main
+-Version tagged
